@@ -1,35 +1,51 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+
+import './App.css';
+import {useState, useEffect} from 'react';
+import FormTransaction from './FormTransaction';
+import Header from './Header';
+import SearchBar from './SearchBar';
+import TableTransaction from './TableTransaction';
 
 function App() {
-  const [count, setCount] = useState(0)
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+  const [transactions, setTransactions] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+
+
+  useEffect(() => {
+    fetch('https://my-json-server.typicode.com/Candy-O-Bosibori/transactions-API/transactions')
+      .then((response) => response.json())
+      .then((data) => {
+        setTransactions(data);
+      });
+  }, []);
+  
+
+function addTransaction(newTransaction) {
+  setTransactions([...transactions, newTransaction]);
 }
 
-export default App
+const filteredTransactions = transactions
+? transactions.filter((transaction) =>
+    transaction.description.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+: [];
+
+function deleteTransaction(id) {
+const updatedTransactions = transactions.filter((transaction) => transaction.id !== id);
+setTransactions(updatedTransactions);
+}
+
+  return (
+    <div className="App">
+      <Header />
+      <FormTransaction  onSubmit={addTransaction} />
+      <SearchBar onSearch={setSearchTerm} />
+      <TableTransaction transactions={filteredTransactions} onDelete={deleteTransaction} />
+      
+      
+    </div>
+  );
+}
+
+export default App;
